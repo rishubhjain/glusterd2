@@ -8,11 +8,13 @@ type Peer struct {
 	Name      string    `json:"name"`
 	Addresses []string  `json:"addresses"`
 	Online    bool      `json:"online"`
+        PeerMetadata map[string]string `json:"meta"`
 }
 
 // PeerAddReq represents an incoming request to add a peer to the cluster
 type PeerAddReq struct {
 	Addresses []string `json:"addresses"`
+        PeerMetadata map[string]string `json:"meta"`
 }
 
 // PeerAddResp is the success response sent to a PeerAddReq request

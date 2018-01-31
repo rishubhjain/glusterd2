@@ -10,6 +10,7 @@ type Peer struct {
 	ID        uuid.UUID
 	Name      string
 	Addresses []string
+        PeerMetadata map[string]string
 }
 
 // ETCDConfig represents the structure which holds the ETCD env variables &

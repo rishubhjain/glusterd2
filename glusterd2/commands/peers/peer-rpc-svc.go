@@ -1,6 +1,7 @@
 package peercommands
 
 import (
+        "fmt"
 	"github.com/gluster/glusterd2/glusterd2/events"
 	"github.com/gluster/glusterd2/glusterd2/gdctx"
 	"github.com/gluster/glusterd2/glusterd2/peer"
@@ -31,6 +32,7 @@ func (p *PeerService) Join(ctx context.Context, req *JoinReq) (*JoinRsp, error) 
 	logger := log.WithFields(log.Fields{
 		"remotepeer":    req.PeerID,
 		"remotecluster": req.ClusterID})
+        fmt.Println("* Printing Request %s* ", req)
 
 	logger.Info("handling new incoming join cluster request")
 
@@ -70,7 +72,7 @@ func (p *PeerService) Join(ctx context.Context, req *JoinReq) (*JoinRsp, error) 
 		return &JoinRsp{"", int32(ErrClusterIDUpdateFailed)}, nil
 	}
 
-	if err := ReconfigureStore(req.Config); err != nil {
+	if err := ReconfigureStore(req.Config, req.ReqMarshal); err != nil {
 		logger.WithError(err).Error("reconfigure store failed, failed to join new cluster")
 		return &JoinRsp{"", int32(ErrStoreReconfigFailed)}, nil
 	}
@@ -125,7 +127,7 @@ func (p *PeerService) Leave(ctx context.Context, req *LeaveReq) (*LeaveRsp, erro
 	}
 
 	logger.Debug("reconfiguring store with defaults")
-	if err := ReconfigureStore(&StoreConfig{store.NewConfig().Endpoints}); err != nil {
+	if err := ReconfigureStore(&StoreConfig{store.NewConfig().Endpoints}, ""); err != nil {
 		logger.WithError(err).Warn("failed to reconfigure store with defaults")
 		// XXX: We should probably keep retrying here?
 	}
@@ -135,7 +137,7 @@ func (p *PeerService) Leave(ctx context.Context, req *LeaveReq) (*LeaveRsp, erro
 
 // ReconfigureStore reconfigures the store with the given store config, if no
 // store config is given uses the default
-func ReconfigureStore(c *StoreConfig) error {
+func ReconfigureStore(c *StoreConfig, req string) error {
 
 	// Destroy the current store first
 	log.Debug("destroying current store")
@@ -153,7 +155,7 @@ func ReconfigureStore(c *StoreConfig) error {
 	if err := store.Init(cfg); err != nil {
 		log.WithError(err).WithField("endpoints", cfg.Endpoints).Error("failed to restart store with new endpoints")
 		// Restart store with default config
-		defer restartDefaultStore(false)
+		defer restartDefaultStore(false, req)
 		return err
 	}
 	log.WithField("endpoints", cfg.Endpoints).Debug("store restarted with new endpoints")
@@ -162,16 +164,16 @@ func ReconfigureStore(c *StoreConfig) error {
 	if err := cfg.Save(); err != nil {
 		log.WithError(err).Error("failed to save new store configs")
 		// Destroy newly started store and restart with default config
-		defer restartDefaultStore(true)
+		defer restartDefaultStore(true, req)
 		return err
 	}
 	log.Debug("saved new store config")
 
 	// Add yourself to the peer list in the new store/cluster
-	if err := peer.AddSelfDetails(); err != nil {
+	if err := peer.AddSelfDetails(req); err != nil {
 		log.WithError(err).Error("failed to add self to peer list")
 		// Destroy newly started store and restart with default config
-		defer restartDefaultStore(true)
+		defer restartDefaultStore(true, req)
 		return err
 	}
 	log.Debug("added details of self to store")
@@ -182,11 +184,11 @@ func ReconfigureStore(c *StoreConfig) error {
 	return nil
 }
 
-func restartDefaultStore(destroy bool) {
+func restartDefaultStore(destroy bool,req string) {
 	if destroy {
 		store.Destroy()
 	}
 	store.Init(nil)
-	peer.AddSelfDetails()
+	peer.AddSelfDetails(req)
 	events.StartGlobal()
 }

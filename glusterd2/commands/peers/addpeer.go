@@ -1,6 +1,8 @@
 package peercommands
 
 import (
+        "encoding/json"
+//      "io/ioutil"
 	"fmt"
 	"net/http"
 
@@ -14,19 +16,22 @@ import (
 )
 
 type peerAddReq struct {
-	Addresses []string
+	Addresses []string `json:"addresses"`
+        PeerMetadata  map[string]string `json:"meta"`
 }
 
 func addPeerHandler(w http.ResponseWriter, r *http.Request) {
-
+  //      body, err := ioutil.ReadAll(r.Body)
+  //      fmt.Printf("%s", body)
 	ctx := r.Context()
 	logger := gdctx.GetReqLogger(ctx)
 
 	var req peerAddReq
 	if err := restutils.UnmarshalRequest(r, &req); err != nil {
 		restutils.SendHTTPError(ctx, w, http.StatusBadRequest, err.Error(), api.ErrCodeDefault)
-		return
-	}
+		return	}
+        fmt.Printf("   Printing the request %s", req.PeerMetadata)
+        fmt.Printf("   Printing the address %s", req)
 
 	if len(req.Addresses) < 1 {
 		restutils.SendHTTPError(ctx, w, http.StatusBadRequest, errors.ErrNoHostnamesPresent.Error(), api.ErrCodeDefault)
@@ -62,7 +67,14 @@ func addPeerHandler(w http.ResponseWriter, r *http.Request) {
 	logger.WithField("endpoints", newconfig.Endpoints).Debug("asking new peer to join cluster with given endpoints")
 
 	// Ask the peer to join the cluster
-	rsp, err := client.JoinCluster(newconfig)
+        reqMarshal, reqMarshalErr := json.Marshal(req)
+        fmt.Printf(" *******8 Printing Marshalled request %s", reqMarshal)
+        if reqMarshalErr != nil {
+               logger.WithError(reqMarshalErr).Error("Failed to marshal request")
+                restutils.SendHTTPError(ctx, w, http.StatusInternalServerError, "failed to marshal request object", api.ErrCodeDefault)
+                return
+        }
+	rsp, err := client.JoinCluster(newconfig, string(reqMarshal))
 	if err != nil {
 		logger.WithError(err).Error("sending Join request failed")
 		restutils.SendHTTPError(ctx, w, http.StatusInternalServerError, "failed to send join cluster request", api.ErrCodeDefault)
@@ -95,5 +107,6 @@ func createPeerAddResp(p *peer.Peer) *api.PeerAddResp {
 		ID:        p.ID,
 		Name:      p.Name,
 		Addresses: p.Addresses,
+                PeerMetadata: p.PeerMetadata,
 	}
 }

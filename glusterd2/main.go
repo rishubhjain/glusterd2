@@ -1,6 +1,7 @@
 package main
 
 import (
+        //"encoding/json"
 	"os"
 	"os/signal"
 	"path"
@@ -26,6 +27,10 @@ import (
 	"github.com/thejerf/suture"
 	"golang.org/x/sys/unix"
 )
+
+type Meta struct {
+    meta string
+}
 
 func main() {
 
@@ -94,7 +99,11 @@ func main() {
 		log.WithError(err).Fatal("Failed to start internal events framework")
 	}
 
-	if err := peer.AddSelfDetails(); err != nil {
+        s := `{ "addresses": [], "meta":{ "group": "1" } }`
+        //meta := make(map[string]string)
+       // meta["group"]="1"
+       // metaJson := json.Marshal(byte(meta))
+	if err := peer.AddSelfDetails(s); err != nil {
 		log.WithError(err).Fatal("Could not add self details into etcd")
 	}
 

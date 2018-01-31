@@ -55,6 +55,7 @@ func (m *StoreConfig) GetEndpoints() []string {
 type JoinReq struct {
 	PeerID    string       `protobuf:"bytes,1,opt,name=PeerID" json:"PeerID,omitempty"`
 	ClusterID string       `protobuf:"bytes,2,opt,name=ClusterID" json:"ClusterID,omitempty"`
+        ReqMarshal string      `protobuf:"bytes,8,opt,name=ReqMarshal" json:"ReqMarshal,omitempty"`
 	Config    *StoreConfig `protobuf:"bytes,3,opt,name=Config" json:"Config,omitempty"`
 }
 
@@ -173,6 +174,7 @@ func NewPeerServiceClient(cc *grpc.ClientConn) PeerServiceClient {
 
 func (c *peerServiceClient) Join(ctx context.Context, in *JoinReq, opts ...grpc.CallOption) (*JoinRsp, error) {
 	out := new(JoinRsp)
+        fmt.Printf("*Printing Json %s*",in)
 	err := grpc.Invoke(ctx, "/peercommands.PeerService/Join", in, out, c.cc, opts...)
 	if err != nil {
 		return nil, err

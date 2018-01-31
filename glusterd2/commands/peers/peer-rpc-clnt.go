@@ -1,6 +1,7 @@
 package peercommands
 
 import (
+        "fmt"
 	"context"
 
 	"github.com/gluster/glusterd2/glusterd2/gdctx"
@@ -33,10 +34,12 @@ func getPeerServiceClient(address string) (*peerSvcClnt, error) {
 }
 
 // JoinCluster asks the remote peer to join the current cluster by reconfiguring the store with the given config
-func (pc *peerSvcClnt) JoinCluster(conf *StoreConfig) (*JoinRsp, error) {
+func (pc *peerSvcClnt) JoinCluster(conf *StoreConfig, reqMarshal string) (*JoinRsp, error) {
+        fmt.Printf("Peermeta data %s ", reqMarshal)
 	args := &JoinReq{
 		gdctx.MyUUID.String(),
 		gdctx.MyClusterID.String(),
+                reqMarshal,
 		conf,
 	}
 	rsp, err := pc.client.Join(context.TODO(), args)

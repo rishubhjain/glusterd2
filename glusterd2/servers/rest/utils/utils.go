@@ -2,6 +2,8 @@
 package utils
 
 import (
+        //"io/ioutil"
+        "fmt"
 	"context"
 	"encoding/json"
 	"net/http"
@@ -19,7 +21,17 @@ type APIError struct {
 // UnmarshalRequest unmarshals JSON in `r` into `v`
 func UnmarshalRequest(r *http.Request, v interface{}) error {
 	defer r.Body.Close()
-	return json.NewDecoder(r.Body).Decode(v)
+        a := json.NewDecoder(r.Body).Decode(v)
+        fmt.Printf("Printing Body %s ", a)
+        //return a
+        //body,err := ioutil.ReadAll(r.Body)
+        
+	//err1 := json.Unmarshal(body, v)
+        //fmt.Printf("Printing error %s",err1)
+        //err2 := json.Unmarshal([]byte(body), v)
+        //fmt.Printf("Printing error again and afain %s",err2)
+        
+        return a
 }
 
 // SendHTTPResponse sends non-error response to the client.
