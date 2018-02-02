@@ -1,6 +1,7 @@
 package peercommands
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 
@@ -14,16 +15,12 @@ import (
 	"github.com/gluster/glusterd2/pkg/utils"
 )
 
-type peerAddReq struct {
-	Addresses []string
-}
-
 func addPeerHandler(w http.ResponseWriter, r *http.Request) {
 
 	ctx := r.Context()
 	logger := gdctx.GetReqLogger(ctx)
 
-	var req peerAddReq
+	var req api.PeerAddReq
 	if err := restutils.UnmarshalRequest(r, &req); err != nil {
 		restutils.SendHTTPError(ctx, w, http.StatusBadRequest, err.Error(), api.ErrCodeDefault)
 		return
@@ -62,8 +59,14 @@ func addPeerHandler(w http.ResponseWriter, r *http.Request) {
 	newconfig := &StoreConfig{store.Store.Endpoints()}
 	logger.WithField("endpoints", newconfig.Endpoints).Debug("asking new peer to join cluster with given endpoints")
 
+	peerAddRequest, marshalErr := json.Marshal(req)
+	if marshalErr != nil {
+		logger.WithError(marshalErr).Error("Failed to marshal request")
+		restutils.SendHTTPError(ctx, w, http.StatusInternalServerError, "failed to marshal request object", api.ErrCodeDefault)
+		return
+	}
 	// Ask the peer to join the cluster
-	rsp, err := client.JoinCluster(newconfig)
+	rsp, err := client.JoinCluster(newconfig, string(peerAddRequest))
 	if err != nil {
 		logger.WithError(err).Error("sending Join request failed")
 		restutils.SendHTTPError(ctx, w, http.StatusInternalServerError, "failed to send join cluster request", api.ErrCodeDefault)
@@ -99,5 +102,6 @@ func createPeerAddResp(p *peer.Peer) *api.PeerAddResp {
 		Name:            p.Name,
 		PeerAddresses:   p.PeerAddresses,
 		ClientAddresses: p.ClientAddresses,
+		MetaData:        p.MetaData,
 	}
 }

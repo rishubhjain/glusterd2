@@ -56,6 +56,7 @@ type JoinReq struct {
 	PeerID    string       `protobuf:"bytes,1,opt,name=PeerID" json:"PeerID,omitempty"`
 	ClusterID string       `protobuf:"bytes,2,opt,name=ClusterID" json:"ClusterID,omitempty"`
 	Config    *StoreConfig `protobuf:"bytes,3,opt,name=Config" json:"Config,omitempty"`
+        PeerAddRequest string  `protobuf:"bytes,4,opt,name=PeerAddRequest" json:"PeerAddRequest,omitempty"`
 }
 
 func (m *JoinReq) Reset()                    { *m = JoinReq{} }
