@@ -1,7 +1,6 @@
 package peercommands
 
 import (
-	"encoding/json"
 	"fmt"
 	"net/http"
 
@@ -59,14 +58,8 @@ func addPeerHandler(w http.ResponseWriter, r *http.Request) {
 	newconfig := &StoreConfig{store.Store.Endpoints()}
 	logger.WithField("endpoints", newconfig.Endpoints).Debug("asking new peer to join cluster with given endpoints")
 
-	peerAddRequest, marshalErr := json.Marshal(req)
-	if marshalErr != nil {
-		logger.WithError(marshalErr).Error("Failed to marshal request")
-		restutils.SendHTTPError(ctx, w, http.StatusInternalServerError, "failed to marshal request object", api.ErrCodeDefault)
-		return
-	}
 	// Ask the peer to join the cluster
-	rsp, err := client.JoinCluster(newconfig, string(peerAddRequest))
+	rsp, err := client.JoinCluster(newconfig)
 	if err != nil {
 		logger.WithError(err).Error("sending Join request failed")
 		restutils.SendHTTPError(ctx, w, http.StatusInternalServerError, "failed to send join cluster request", api.ErrCodeDefault)
@@ -86,7 +79,12 @@ func addPeerHandler(w http.ResponseWriter, r *http.Request) {
 		restutils.SendHTTPError(ctx, w, http.StatusInternalServerError, "new peer was added, but could not find peer in store. Try again later.", api.ErrCodeDefault)
 		return
 	}
-
+	newpeer.MetaData = req.MetaData
+        fmt.Printf("Peering %s", newpeer)
+	err = peer.AddOrUpdatePeer(newpeer)
+	if err != nil {
+		restutils.SendHTTPError(ctx, w, http.StatusInternalServerError, "Fail to add metadata to peer", api.ErrCodeDefault)
+	}
 	resp := createPeerAddResp(newpeer)
 	restutils.SendHTTPResponse(ctx, w, http.StatusCreated, resp)
 

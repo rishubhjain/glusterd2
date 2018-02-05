@@ -70,7 +70,7 @@ func (p *PeerService) Join(ctx context.Context, req *JoinReq) (*JoinRsp, error) 
 		return &JoinRsp{"", int32(ErrClusterIDUpdateFailed)}, nil
 	}
 
-	if err := ReconfigureStore(req.Config, &req.PeerAddRequest); err != nil {
+	if err := ReconfigureStore(req.Config); err != nil {
 		logger.WithError(err).Error("reconfigure store failed, failed to join new cluster")
 		return &JoinRsp{"", int32(ErrStoreReconfigFailed)}, nil
 	}
@@ -125,7 +125,7 @@ func (p *PeerService) Leave(ctx context.Context, req *LeaveReq) (*LeaveRsp, erro
 	}
 
 	logger.Debug("reconfiguring store with defaults")
-	if err := ReconfigureStore(&StoreConfig{store.NewConfig().Endpoints}, nil); err != nil {
+	if err := ReconfigureStore(&StoreConfig{store.NewConfig().Endpoints}); err != nil {
 		logger.WithError(err).Warn("failed to reconfigure store with defaults")
 		// XXX: We should probably keep retrying here?
 	}
@@ -135,7 +135,7 @@ func (p *PeerService) Leave(ctx context.Context, req *LeaveReq) (*LeaveRsp, erro
 
 // ReconfigureStore reconfigures the store with the given store config, if no
 // store config is given uses the default
-func ReconfigureStore(c *StoreConfig, peerAddRequest *string) error {
+func ReconfigureStore(c *StoreConfig) error {
 
 	// Destroy the current store first
 	log.Debug("destroying current store")
@@ -168,7 +168,7 @@ func ReconfigureStore(c *StoreConfig, peerAddRequest *string) error {
 	log.Debug("saved new store config")
 
 	// Add yourself to the peer list in the new store/cluster
-	if err := peer.AddSelfDetails(peerAddRequest); err != nil {
+	if err := peer.AddSelfDetails(); err != nil {
 		log.WithError(err).Error("failed to add self to peer list")
 		// Destroy newly started store and restart with default config
 		defer restartDefaultStore(true)
@@ -187,6 +187,6 @@ func restartDefaultStore(destroy bool) {
 		store.Destroy()
 	}
 	store.Init(nil)
-	peer.AddSelfDetails(nil)
+	peer.AddSelfDetails()
 	events.StartGlobal()
 }

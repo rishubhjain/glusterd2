@@ -94,7 +94,7 @@ func main() {
 		log.WithError(err).Fatal("Failed to start internal events framework")
 	}
 
-	if err := peer.AddSelfDetails(nil); err != nil {
+	if err := peer.AddSelfDetails(); err != nil {
 		log.WithError(err).Fatal("Could not add self details into etcd")
 	}
 

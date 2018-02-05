@@ -33,12 +33,11 @@ func getPeerServiceClient(address string) (*peerSvcClnt, error) {
 }
 
 // JoinCluster asks the remote peer to join the current cluster by reconfiguring the store with the given config
-func (pc *peerSvcClnt) JoinCluster(conf *StoreConfig, peerAddRequest string) (*JoinRsp, error) {
+func (pc *peerSvcClnt) JoinCluster(conf *StoreConfig) (*JoinRsp, error) {
 	args := &JoinReq{
 		gdctx.MyUUID.String(),
 		gdctx.MyClusterID.String(),
 		conf,
-		peerAddRequest,
 	}
 	rsp, err := pc.client.Join(context.TODO(), args)
 	if err != nil {

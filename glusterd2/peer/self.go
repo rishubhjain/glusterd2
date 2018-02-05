@@ -1,12 +1,10 @@
 package peer
 
 import (
-	"encoding/json"
 	"fmt"
 	"net"
 
 	"github.com/gluster/glusterd2/glusterd2/gdctx"
-	"github.com/gluster/glusterd2/pkg/api"
 
 	config "github.com/spf13/viper"
 )
@@ -40,17 +38,12 @@ func normalizeAddrs() ([]string, error) {
 }
 
 // AddSelfDetails results in the peer adding its own details into etcd
-func AddSelfDetails(peerAddRequest *string) error {
+func AddSelfDetails() error {
 	var err error
 	p := &Peer{
 		ID:            gdctx.MyUUID,
 		Name:          gdctx.HostName,
 		PeerAddresses: []string{config.GetString("peeraddress")},
-	}
-	if peerAddRequest != nil {
-		var v api.PeerAddReq
-		_ = json.Unmarshal([]byte(*peerAddRequest), &v)
-		p.MetaData = v.MetaData
 	}
 	p.ClientAddresses, err = normalizeAddrs()
 	if err != nil {
