@@ -6,16 +6,16 @@ import (
 	"net/http"
 
 	device "github.com/gluster/glusterd2/glusterd2/device"
+	"github.com/gluster/glusterd2/glusterd2/gdctx"
+	"github.com/gluster/glusterd2/glusterd2/peer"
 	restutils "github.com/gluster/glusterd2/glusterd2/servers/rest/utils"
 	"github.com/gluster/glusterd2/glusterd2/store"
 	"github.com/gluster/glusterd2/glusterd2/transaction"
 	"github.com/gluster/glusterd2/pkg/api"
-	"github.com/gluster/glusterd2/glusterd2/gdctx"
-	"github.com/gluster/glusterd2/glusterd2/peer"
 
-	log "github.com/sirupsen/logrus"
-	"github.com/pborman/uuid"
 	"github.com/coreos/etcd/clientv3"
+	"github.com/pborman/uuid"
+	log "github.com/sirupsen/logrus"
 )
 
 func deviceAddHandler(w http.ResponseWriter, r *http.Request) {
