@@ -4,8 +4,9 @@ import (
 	"context"
 	"encoding/json"
 	"net/http"
+	"fmt"
 
-	device "github.com/gluster/glusterd2/glusterd2/device"
+//	device "github.com/gluster/glusterd2/glusterd2/device"
 	"github.com/gluster/glusterd2/glusterd2/gdctx"
 	"github.com/gluster/glusterd2/glusterd2/peer"
 	restutils "github.com/gluster/glusterd2/glusterd2/servers/rest/utils"
@@ -29,10 +30,18 @@ func deviceAddHandler(w http.ResponseWriter, r *http.Request) {
 		restutils.SendHTTPError(ctx, w, http.StatusBadRequest, "Unable to marshal request", api.ErrCodeDefault)
 		return
 	}
-	deviceinfo := api.Info{
-		Names:  req.Names,
+
+	
+	deviceinfo := api.Device{
 		PeerID: req.PeerID,
 	}
+	for _, name := range req.Names {
+		tempInfo := api.Info {
+				Name: name,
+			    }
+		deviceinfo.Detail = append(deviceinfo.Detail, tempInfo)
+	}
+	fmt.Printf("Printiing deviceinfo %s ", deviceinfo)
 	if req.PeerID == nil {
 		restutils.SendHTTPError(ctx, w, http.StatusBadRequest, "Peer ID not found in request", api.ErrCodeDefault)
 		return
@@ -58,7 +67,7 @@ func deviceAddHandler(w http.ResponseWriter, r *http.Request) {
 		},
 	}
 	txn.Ctx.Set("peerid", deviceinfo.PeerID.String())
-	txn.Ctx.Set("names", deviceinfo.Names)
+	txn.Ctx.Set("device-details", deviceinfo.Detail)
 
 	err = txn.Do()
 	if err != nil {
@@ -67,7 +76,7 @@ func deviceAddHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	// update device state
-	deviceinfo.State = device.DeviceEnabled
+	//deviceinfo.State = device.DeviceEnabled
 	deviceJSON, err := json.Marshal(deviceinfo)
 	if err != nil {
 		log.WithField("error", err).Error("Failed to marshal the DeviceInfo object")
@@ -80,16 +89,16 @@ func deviceAddHandler(w http.ResponseWriter, r *http.Request) {
 	if len(deviceDetails.Kvs) > 0 {
 		for _, kv := range deviceDetails.Kvs {
 
-			var v api.Info
+			var v api.Device
 
 			if err := json.Unmarshal(kv.Value, &v); err != nil {
 				restutils.SendHTTPError(ctx, w, http.StatusInternalServerError, "Unable to add device to store", api.ErrCodeDefault)
 				return
 			}
 
-			for _, val := range deviceinfo.Names {
-				v.Names = append(v.Names, val)
-			}
+			//for _, val := range deviceinfo.Names {
+			//	v.Names = append(v.Names, val)
+			//}
 			deviceJSON, err := json.Marshal(v)
 			if err != nil {
 				restutils.SendHTTPError(ctx, w, http.StatusInternalServerError, "Unable to add device to store", api.ErrCodeDefault)

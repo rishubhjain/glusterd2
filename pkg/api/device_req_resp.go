@@ -8,9 +8,16 @@ type AddDeviceReq struct {
 	Names  []string  `json:"names"`
 }
 
-// Info structure
+// Device is the added device info
+type Device struct {
+        PeerID uuid.UUID `json:"peer-id"`
+        Detail   []Info  `json:"device-details"`
+        Names   string   `json:"name"`
+        State   string   `json:"state"`
+}
+
+// Info is the info of each device
 type Info struct {
-	PeerID uuid.UUID `json:"peer-id"`
-	Names  []string  `json:"names"`
-	State  string    `json:"state"`
+        Name   string   `json:"name"`
+        State  string   `json:"state"`
 }
