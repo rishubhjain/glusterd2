@@ -13,9 +13,14 @@ const (
 	DeviceEvacuated = "Evacuated"
 )
 
-// Info is the added device info
+// Device is the added device info
+type Device struct {
+        PeerID uuid.UUID `json:"peer-id"`
+        Detail   []Info  `json:"device-details"`
+}
+
+// Info is the info of each device
 type Info struct {
-	PeerID uuid.UUID `json:"peer-id"`
-	Names  []string  `json:"names"`
-	State  string    `json:"state"`
+        Name   string   `json:"name"`
+        State  string   `json:"state"`
 }

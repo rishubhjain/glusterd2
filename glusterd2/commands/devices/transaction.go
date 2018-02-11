@@ -6,6 +6,7 @@ import (
 
 	"github.com/gluster/glusterd2/glusterd2/transaction"
 	"github.com/gluster/glusterd2/pkg/api"
+	device "github.com/gluster/glusterd2/glusterd2/device"
 )
 
 func txnPrepareDevice(c transaction.TxnCtx) error {
@@ -34,5 +35,6 @@ func txnPrepareDevice(c transaction.TxnCtx) error {
 		}
 		element.State = device.DeviceEnabled
 	}
+	
 	return nil
 }

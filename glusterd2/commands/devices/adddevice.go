@@ -1,18 +1,15 @@
 package devicecommands
 
 import (
-	"context"
-	"encoding/json"
 	"net/http"
 
+	device "github.com/gluster/glusterd2/glusterd2/device"
 	"github.com/gluster/glusterd2/glusterd2/gdctx"
 	"github.com/gluster/glusterd2/glusterd2/peer"
 	restutils "github.com/gluster/glusterd2/glusterd2/servers/rest/utils"
-	"github.com/gluster/glusterd2/glusterd2/store"
 	"github.com/gluster/glusterd2/glusterd2/transaction"
 	"github.com/gluster/glusterd2/pkg/api"
 
-	"github.com/coreos/etcd/clientv3"
 	"github.com/pborman/uuid"
 	log "github.com/sirupsen/logrus"
 )
@@ -28,7 +25,7 @@ func deviceAddHandler(w http.ResponseWriter, r *http.Request) {
 		restutils.SendHTTPError(ctx, w, http.StatusBadRequest, "Unable to marshal request", api.ErrCodeDefault)
 		return
 	}
-	deviceinfo := api.Info{
+	deviceinfo := api.Device{
 		PeerID: req.PeerID,
 	}
         for _, name := range req.Names {
@@ -71,16 +68,18 @@ func deviceAddHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	// update device state
-	deviceJSON, err := json.Marshal(deviceinfo)
+	//deviceJSON, err := json.Marshal(deviceinfo)
 	if err != nil {
 		log.WithField("error", err).Error("Failed to marshal the DeviceInfo object")
 		restutils.SendHTTPError(ctx, w, http.StatusInternalServerError, "Failed to marshal the DeviceInfo object", api.ErrCodeDefault)
 		return
 	}
+	/*
+	deviceDetails, err := device.GetDevice(req.PeerID.String())
+	fmt.Printf("Printing Device details %s", deviceDetails)
+	//fmt.Printf("Printing Json valeu %s", deviceJSON)
 
-	deviceDetails, _ := store.Store.Get(context.TODO(), "devices/"+req.PeerID.String(), clientv3.WithPrefix())
-
-	if len(deviceDetails.Kvs) > 0 {
+	if deviceDetails != nil {
 		for _, kv := range deviceDetails.Kvs {
 
 			var v api.Device
@@ -101,13 +100,15 @@ func deviceAddHandler(w http.ResponseWriter, r *http.Request) {
 			_, err = store.Store.Put(context.TODO(), "devices/"+req.PeerID.String(), string(deviceJSON))
 		}
 	} else {
-		_, err = store.Store.Put(context.TODO(), "devices/"+req.PeerID.String(), string(deviceJSON))
+		err := device.AddOrUpdateDevice(&deviceinfo)
+		//_, err = store.Store.Put(context.TODO(), "devices/"+req.PeerID.String(), string(deviceJSON))
 		if err != nil {
 			log.WithError(err).Error("Couldn't add deviceinfo to store")
 			restutils.SendHTTPError(ctx, w, http.StatusInternalServerError, "Unable to add device to store", api.ErrCodeDefault)
 			return
 		}
-	}
-	restutils.SendHTTPResponse(ctx, w, http.StatusOK, deviceinfo)
+	}*/
+	deviceInfo, _ := device.GetDevice(req.PeerID.String())
+	restutils.SendHTTPResponse(ctx, w, http.StatusOK, deviceInfo)
 
 }

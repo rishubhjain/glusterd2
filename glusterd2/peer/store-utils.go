@@ -6,7 +6,7 @@ package peer
 import (
 	"context"
 	"encoding/json"
-
+	"fmt"
 	"github.com/gluster/glusterd2/glusterd2/store"
 	"github.com/gluster/glusterd2/pkg/errors"
 	"github.com/gluster/glusterd2/pkg/utils"
@@ -52,6 +52,7 @@ func AddOrUpdatePeer(p *Peer) error {
 // GetPeer returns specified peer from the store
 func GetPeer(id string) (*Peer, error) {
 	resp, err := store.Store.Get(context.TODO(), peerPrefix+id)
+	fmt.Printf("Printing peer %s", resp.Kvs)
 	if err != nil {
 		return nil, err
 	}
@@ -90,6 +91,7 @@ func GetInitialCluster() (string, error) {
 // GetPeers returns all available peers in the store
 func GetPeers() ([]*Peer, error) {
 	resp, err := store.Store.Get(context.TODO(), peerPrefix, clientv3.WithPrefix())
+	fmt.Printf("Printing peer GetPeers %s", resp.Kvs)
 	if err != nil {
 		return nil, err
 	}
