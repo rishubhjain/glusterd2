@@ -3,19 +3,18 @@ package api
 import "github.com/pborman/uuid"
 
 const (
-        // DeviceEnabled represents enabled
-        DeviceEnabled = "Enabled"
+	// DeviceEnabled represents enabled
+	DeviceEnabled = "Enabled"
 
-        // DeviceFrozen represents frozen
-        DeviceFrozen = "Frozen"
+	// DeviceFrozen represents frozen
+	DeviceFrozen = "Frozen"
 
-        // DeviceEvacuated represents evacuated
-        DeviceEvacuated = "Evacuated"
+	// DeviceEvacuated represents evacuated
+	DeviceEvacuated = "Evacuated"
 
 	// DeviceFailed represents failed
 	DeviceFailed = "Failed"
 )
-
 
 // AddDeviceReq structure
 type AddDeviceReq struct {
@@ -23,9 +22,14 @@ type AddDeviceReq struct {
 	Names  []string  `json:"names"`
 }
 
-// Info structure
-type Info struct {
+// Device is the added device info
+type Device struct {
 	PeerID uuid.UUID `json:"peer-id"`
-	Names  []string  `json:"names"`
-	State  string    `json:"state"`
+	Detail []Info    `json:"device-details"`
+}
+
+// Info structure is the info of each device
+type Info struct {
+	Name  string `json:"name"`
+	State string `json:"state"`
 }
