@@ -26,6 +26,7 @@ type VolCreateReq struct {
 	Subvols   []SubvolReq       `json:"subvols"`
 	Options   map[string]string `json:"options,omitempty"`
 	Force     bool              `json:"force,omitempty"`
+	Size	  int		    `json:"size,omitempty"`
 }
 
 // VolOptionReq represents an incoming request to set volume options

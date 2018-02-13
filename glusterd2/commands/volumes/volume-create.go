@@ -211,7 +211,11 @@ func volumeCreateHandler(w http.ResponseWriter, r *http.Request) {
 		restutils.SendHTTPError(ctx, w, httpStatus, err.Error(), api.ErrCodeDefault)
 		return
 	}
-
+	fmt.Printf("Printing request %s",req)
+	if req.Size > 0 {
+		fmt.Printf("Printing size %s",req.Size)
+		_ = NewSimpleAllocatortest()
+	}
 	if volume.ExistsFunc(req.Name) {
 		restutils.SendHTTPError(ctx, w, http.StatusInternalServerError, gderrors.ErrVolExists.Error(), api.ErrCodeDefault)
 		return
