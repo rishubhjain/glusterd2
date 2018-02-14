@@ -23,7 +23,7 @@ type SubvolReq struct {
 type VolCreateReq struct {
 	Name      string            `json:"name"`
 	Transport string            `json:"transport,omitempty"`
-	Subvols   []SubvolReq       `json:"subvols"`
+	Subvols   []SubvolReq       `json:"subvols,omitempty"`
 	Options   map[string]string `json:"options,omitempty"`
 	Force     bool              `json:"force,omitempty"`
 	Size	  int		    `json:"size,omitempty"`

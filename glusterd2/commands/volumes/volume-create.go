@@ -19,6 +19,7 @@ import (
 
 func unmarshalVolCreateRequest(msg *api.VolCreateReq, r *http.Request) (int, error) {
 	if err := restutils.UnmarshalRequest(r, msg); err != nil {
+		fmt.Printf("Errrrroroorororororo")
 		return 422, gderrors.ErrJSONParsingFailed
 	}
 
@@ -32,7 +33,8 @@ func unmarshalVolCreateRequest(msg *api.VolCreateReq, r *http.Request) (int, err
 
 	for _, subvol := range msg.Subvols {
 		if len(subvol.Bricks) <= 0 {
-			return http.StatusBadRequest, gderrors.ErrEmptyBrickList
+			fmt.Printf("Printing errors")
+			//return http.StatusBadRequest, gderrors.ErrEmptyBrickList
 		}
 	}
 	return 0, nil
@@ -205,6 +207,7 @@ func volumeCreateHandler(w http.ResponseWriter, r *http.Request) {
 	logger := gdctx.GetReqLogger(ctx)
 
 	req := new(api.VolCreateReq)
+	fmt.Printf("YOOOOOOOOOOOOOOOOOOO")
 	httpStatus, err := unmarshalVolCreateRequest(req, r)
 	if err != nil {
 		logger.WithError(err).Error("Failed to unmarshal volume request")
