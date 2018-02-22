@@ -44,13 +44,16 @@ func txnPrepareDevice(c transaction.TxnCtx) error {
 	deviceDetails, _ := device.GetDevice(deviceinfo.PeerID.String())
 	if deviceDetails != nil {
 		for _, element := range deviceinfo.Detail {
+			fmt.Printf("Printing deviceDetails %s", element)
 			deviceDetails.Detail = append(deviceDetails.Detail, element)
 		}
+		fmt.Printf("Printing complete device details ")
 		err := device.AddOrUpdateDevice(deviceDetails)
 		if err != nil {
 			log.WithError(err).Error("Couldn't add deviceinfo to store")
 		}
 	} else {
+		fmt.Printf("Printing complete device details 11111111111")
 		err := device.AddOrUpdateDevice(&deviceinfo)
 		if err != nil {
 			log.WithError(err).Error("Couldn't add deviceinfo to store")

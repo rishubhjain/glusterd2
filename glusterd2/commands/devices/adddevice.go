@@ -49,19 +49,19 @@ func deviceAddHandler(w http.ResponseWriter, r *http.Request) {
 	txn := transaction.NewTxn(ctx)
 	defer txn.Cleanup()
 
-	nodes := make([]uuid.UUID, 0)
-	nodes = append(nodes, uuid.UUID(peerID))
+	nodes := []uuid.UUID{p.ID}
 
 	txn.Nodes = nodes
+	fmt.Printf("Printing Node ******* %s ****** ", txn.Nodes)
 	txn.Steps = []*transaction.Step{
 		{
-			DoFunc: "prepare-device.Commit",
+			DoFunc: "prepare-device",
 			Nodes:  txn.Nodes,
 		},
 	}
 	txn.Ctx.Set("peerid", peerID)
 	txn.Ctx.Set("device-details", v)
-
+	fmt.Printf("Doing transaction")
 	err = txn.Do()
 	if err != nil {
 		logger.WithError(err).Error("Transaction Failed")
