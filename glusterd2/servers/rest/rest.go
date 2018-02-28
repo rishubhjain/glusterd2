@@ -81,6 +81,7 @@ func NewMuxed(m cmux.CMux) *GDRest {
 		middleware.ReqIDGenerator,
 		middleware.LogRequest,
 		middleware.Auth,
+		middleware.Dynamic_volume,
 	).Then(rest.Routes)
 
 	return rest
