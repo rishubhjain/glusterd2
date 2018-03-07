@@ -47,6 +47,7 @@ func AddSelfDetails() error {
 		PeerAddresses: []string{config.GetString("peeraddress")},
 	}
 
+	p.MetaData["group"] = "1"
 	p.ClientAddresses, err = normalizeAddrs()
 	if err != nil {
 		return err
