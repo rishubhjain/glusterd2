@@ -2,6 +2,7 @@ package deviceutils
 
 import (
 	"encoding/json"
+	"errors"
 
 	peer "github.com/gluster/glusterd2/glusterd2/peer"
 	deviceapi "github.com/gluster/glusterd2/plugins/device/api"
@@ -22,7 +23,18 @@ func GetDevices(peerID string) ([]deviceapi.Info, error) {
 	return deviceInfo, nil
 }
 
-// DeviceExist checks the given device existence
+// GetDevice returns device from list of devices
+func GetDevice(devices []deviceapi.Info, deviceName string) (deviceapi.Info, error) {
+	for _, device := range devices {
+		if deviceName == device.Name {
+			return device, nil
+		}
+	}
+	var device deviceapi.Info
+	return device, errors.New("Device doesnot exists in the given peer")
+}
+
+// DeviceExist checks the given device exists or not in etcd
 func DeviceExist(reqDevice string, devices []deviceapi.Info) bool {
 	for _, key := range devices {
 		if reqDevice == key.Name {
