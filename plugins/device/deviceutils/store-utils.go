@@ -30,8 +30,8 @@ func GetDevice(devices []deviceapi.Info, deviceName string) (deviceapi.Info, err
 			return device, nil
 		}
 	}
-	var device deviceapi.Info
-	return device, errors.New("Device doesnot exists in the given peer")
+
+	return deviceapi.Info{}, errors.New("Device doesnot exists in the given peer")
 }
 
 // DeviceExist checks the given device exists or not in etcd

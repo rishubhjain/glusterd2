@@ -34,8 +34,8 @@ func deviceAddHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	lock, unlock := transaction.CreateLockFuncs(peerID)
-	if err := lock(ctx); err != nil {
+	txn, err := transaction.NewTxnWithLocks(ctx, peerID)
+	if err != nil {
 		if err == transaction.ErrLockTimeout {
 			restutils.SendHTTPError(ctx, w, http.StatusConflict, err)
 		} else {
@@ -43,7 +43,7 @@ func deviceAddHandler(w http.ResponseWriter, r *http.Request) {
 		}
 		return
 	}
-	defer unlock(ctx)
+	defer txn.Done()
 
 	peerInfo, err := peer.GetPeer(peerID)
 	if err != nil {
@@ -70,9 +70,6 @@ func deviceAddHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
-
-	txn := transaction.NewTxn(ctx)
-	defer txn.Cleanup()
 
 	txn.Nodes = []uuid.UUID{peerInfo.ID}
 	txn.Steps = []*transaction.Step{
@@ -152,7 +149,7 @@ func deviceEditStateHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var deviceState string
-	deviceState, exists := deviceapi.DeviceStates[strings.ToLower(deviceState)]
+	deviceState, exists := deviceapi.DeviceStates[strings.ToLower(req.State)]
 	if !exists {
 		logger.Error("State provided in request doesnot match any state supported by device")
 		errMsg := fmt.Sprintf("Invalid state, Supported states are (%v)", getKeys(deviceapi.DeviceStates))
@@ -160,9 +157,9 @@ func deviceEditStateHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	lock, unlock := transaction.CreateLockFuncs(peerID)
+	txn, err := transaction.NewTxnWithLocks(ctx, peerID)
 
-	if err := lock(ctx); err != nil {
+	if err != nil {
 		if err == transaction.ErrLockTimeout {
 			restutils.SendHTTPError(ctx, w, http.StatusConflict, err)
 		} else {
@@ -170,7 +167,7 @@ func deviceEditStateHandler(w http.ResponseWriter, r *http.Request) {
 		}
 		return
 	}
-	defer unlock(ctx)
+	defer txn.Done()
 
 	peerInfo, err := peer.GetPeer(peerID)
 	if err != nil {
