@@ -46,14 +46,19 @@ func DeviceExist(reqDevice string, devices []deviceapi.Info) bool {
 
 // AddDevice adds device to peerinfo
 func AddDevice(device deviceapi.Info, peerID string) error {
-	deviceDetails, err := GetDevices(peerID)
-	if err != nil {
-		return err
-	}
 	peerInfo, err := peer.GetPeer(peerID)
 	if err != nil {
 		return err
 	}
+	var deviceDetails []deviceapi.Info
+	if _, exists := peerInfo.Metadata["_devices"]; exists {
+		var err error
+		deviceDetails, err = GetDevices(peerID)
+		if err != nil {
+			return err
+		}
+	}
+
 	var devices []deviceapi.Info
 	if deviceDetails != nil {
 		devices = append(deviceDetails, device)
