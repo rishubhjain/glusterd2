@@ -9,6 +9,7 @@ import (
 	restutils "github.com/gluster/glusterd2/glusterd2/servers/rest/utils"
 	"github.com/gluster/glusterd2/glusterd2/store"
 	"github.com/gluster/glusterd2/glusterd2/volume"
+	"github.com/gluster/glusterd2/pkg/errors"
 	"github.com/gluster/glusterd2/pkg/utils"
 
 	"github.com/gorilla/mux"
@@ -38,12 +39,13 @@ func deletePeerHandler(w http.ResponseWriter, r *http.Request) {
 	// Check whether the member exists
 	p, err := peer.GetPeerF(id)
 	if err != nil {
-		logger.WithError(err).Error("failed to get peer")
+		if err == errors.ErrPeerNotFound {
+			logger.WithError(err).WithField("peerid", id).Error("request denied, received request to remove unknown peer")
+			restutils.SendHTTPError(ctx, w, http.StatusNotFound, "peer not found in cluster")
+			return
+		}
+		logger.WithError(err).WithField("peerid", id).Error("failed to get peer")
 		restutils.SendHTTPError(ctx, w, http.StatusInternalServerError, "could not validate delete request")
-		return
-	} else if p == nil {
-		logger.Debug("request denied, received request to remove unknown peer")
-		restutils.SendHTTPError(ctx, w, http.StatusNotFound, "peer not found in cluster")
 		return
 	}
 
